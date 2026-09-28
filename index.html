@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aheryn: o hino do gelo, As Quatro Vontades</title>
+<meta name="description" content="Minigame do Capítulo I de As Quatro Vontades. Três Tacets sobem a encosta; cante o hino e abra o gelo sob eles.">
+<meta name="theme-color" content="#0d1b24">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Spectral:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❄️</text></svg>">
+</head>
+<body>
+<canvas id="scene"></canvas>
+
+<div class="chrome">
+  <button id="mute" class="icon" aria-label="Som">
+    <svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="w" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/><path class="x" d="M16 9l6 6M22 9l-6 6"/></svg>
+  </button>
+  <button id="fs" class="icon" aria-label="Tela cheia"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  <button id="lang" class="icon txt">EN</button>
+</div>
+
+<div id="hud">
+  <div class="barrow"><div id="bar"><i></i><b></b></div><span id="mult" data-m="1">×1</span></div>
+  <div id="score">0</div>
+  <div id="time">3:30</div>
+</div>
+<svg id="links"></svg>
+<div id="field"></div>
+<div id="judges"></div>
+<p id="caption" class="caption"></p>
+
+<section id="title" class="panel">
+  <p class="book" data-t="book">Capítulo I de As Quatro Vontades</p>
+  <h1 data-t="title">Aheryn</h1>
+  <p class="sub" data-t="sub">O hino do gelo</p>
+  <p class="lede" data-t="lede"></p>
+  <div class="how">
+    <div class="legend" aria-hidden="true">
+      <span class="lg-rune"><b>W</b></span>
+      <svg viewBox="0 0 100 100" class="lg-trap"><path d="M50 4 L66 26 L92 30 L78 52 L90 76 L62 78 L50 96 L36 78 L10 76 L22 52 L8 30 L34 26 Z"/><rect x="38" y="47" width="24" height="5" rx="2"/></svg>
+    </div>
+    <p><span data-t="how1"></span><br><span data-t="how2"></span></p>
+  </div>
+  <button id="start" class="cta" disabled data-t="loading">Carregando o gelo</button>
+  <p class="rotate" data-t="rotate"></p>
+  <div id="load"><i></i></div>
+</section>
+
+<section id="end" class="panel hide">
+  <p id="endLine" class="endline"></p>
+  <p id="rank" hidden></p>
+  <p id="endTip" class="tip"></p>
+  <dl id="stats"></dl>
+  <div id="lb">
+    <div id="lbForm"><input id="lbName" maxlength="16" autocomplete="nickname" data-ph="lb_ph"><button id="lbSend" data-t="lb_send">Gravar no placar</button></div>
+    <p id="lbMsg"></p>
+    <p id="lbTitle" data-t="lb_title">Os que cantaram mais alto</p>
+    <ol id="lbList"></ol>
+  </div>
+  <div class="row">
+    <button id="again" class="cta" data-t="again">Cantar de novo</button>
+    <button id="back" class="ghost" data-t="back">Voltar ao início</button>
+  </div>
+</section>
+
+<div id="cine"><video id="cineVideo" playsinline webkit-playsinline preload="auto"></video><button id="skip" class="ghost" data-t="skip">Pular</button></div>
+
+<script type="module" src="game.js"></script>
+</body>
+</html>
