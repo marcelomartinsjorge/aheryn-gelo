@@ -71,7 +71,7 @@ h1 {
 .ghost { background: none; border: none; color: var(--mist); font-size: 16px; font-style: italic; padding: 14px 8px; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(159,179,189,.4); }
 .ghost:hover { color: var(--frost); }
 
-#end { justify-content: center; }
+#end { justify-content: flex-start; padding-top: max(56px, calc(5vh + env(safe-area-inset-top, 0px))); padding-bottom: max(32px, calc(4vh + env(safe-area-inset-bottom, 0px))); }
 .endline { font-size: clamp(26px, 3.2vw, 38px); font-style: italic; font-weight: 300; line-height: 1.3; margin: 0 0 14px; max-width: 20ch; }
 #end.won .endline { color: var(--lumae-hot); text-shadow: 0 0 30px rgba(241,182,80,.4); }
 #end.lost .endline { color: var(--frost); }
@@ -216,8 +216,8 @@ body.portrait #hud .barrow { margin-top: 60px; } body.portrait #bar { width: 70v
 #lbList li .s { font-family: var(--serif-d); color: var(--lumae-hot); font-variant-numeric: tabular-nums; }
 #lbList li.me { color: var(--lumae-hot); }
 #lbTitle { font-family: var(--serif-d); font-size: 13px; letter-spacing: .1em; color: var(--mist); margin: 0 0 6px; }
-#end { overflow-y: auto; }
-@media (max-height: 560px) { #end { justify-content: flex-start; padding-top: 60px; } .endline { font-size: 22px; } #stats { gap: 8px 18px; margin: 6px 0 16px; } #stats dd { font-size: 19px; } #lbList { max-height: 22vh; } }
+#end { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+@media (max-height: 560px) { #end { padding-top: 60px; } .endline { font-size: 22px; } #stats { gap: 8px 18px; margin: 6px 0 16px; } #stats dd { font-size: 19px; } #lbList { max-height: 22vh; } }
 
 /* ---------- teclado de símbolos (toque) ---------- */
 body.touch .rune { pointer-events: none; }

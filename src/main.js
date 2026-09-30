@@ -74,7 +74,7 @@ const TXT = {
     miss: 'apagou', trap: 'Bronze!', chain: 'Constelação',
     ranks: ['Velho sem história', 'Voz do hino', 'Herói do seu povo', 'O que viu mais longe'],
     restart: 'O hino recomeça', rotate: 'Gire o celular para jogar deitado',
-    kp_hint: 'Toque o símbolo igual ao da runa', bronze_save: 'O caco no bolso esquentou. Reconheci o bronze a tempo.', book_cta: 'Pôr a mão no chão', book_go: 'Continuar a história', book_retry: 'Tentar de novo', book_skip: 'Seguir a história', book_lede: 'Toque para pedir ao gelo.', s_time_bonus: 'Bônus de tempo', s_total: 'Total',
+    kp_hint: 'Toque o símbolo igual ao da runa', bronze_save: 'O caco no bolso esquentou. Reconheci o bronze a tempo.', book_cta: 'Pôr a mão no chão', book_go: 'Continuar a história', book_again: 'Jogar de novo', book_retry: 'Tentar de novo', book_skip: 'Seguir a história', book_lede: 'Toque para pedir ao gelo.', s_time_bonus: 'Bônus de tempo', s_total: 'Total', c_ferido: 'O ombro ainda doía, cada vez que erguia o braço.', c_hesitou: 'As mãos ainda lembravam o formato da luz que quase soltaram.',
     lb_ph: 'Seu nome', lb_send: 'Gravar no placar', lb_title: 'Os que cantaram mais alto', lb_saved: 'Gravado. O hino lembra de você.', lb_err: 'Não consegui falar com o placar agora. Tente de novo.', lb_empty: 'Ninguém cantou ainda. Seja o primeiro.', lb_need: 'Escreva um nome de até 16 letras.',
   },
   en: {
@@ -95,7 +95,7 @@ const TXT = {
     miss: 'faded', trap: 'Bronze!', chain: 'Constellation',
     ranks: ['Old man with no story', 'Voice of the hymn', 'Hero of his people', 'The one who saw farthest'],
     restart: 'The hymn starts over', rotate: 'Turn your phone sideways to play',
-    kp_hint: 'Tap the symbol that matches the rune', bronze_save: 'The shard in my pocket grew warm. I recognized the bronze in time.', book_cta: 'Put my hand on the ground', book_go: 'Continue the story', book_retry: 'Try again', book_skip: 'Let the story go on', book_lede: 'Tap to ask the ice.', s_time_bonus: 'Time bonus', s_total: 'Total',
+    kp_hint: 'Tap the symbol that matches the rune', bronze_save: 'The shard in my pocket grew warm. I recognized the bronze in time.', book_cta: 'Put my hand on the ground', book_go: 'Continue the story', book_again: 'Play again', book_retry: 'Try again', book_skip: 'Let the story go on', book_lede: 'Tap to ask the ice.', s_time_bonus: 'Time bonus', s_total: 'Total', c_ferido: 'The shoulder still ached, every time he raised his arm.', c_hesitou: 'The hands still remembered the shape of the light they almost let go.',
     lb_ph: 'Your name', lb_send: 'Save score', lb_title: 'Those who sang the loudest', lb_saved: 'Saved. The hymn remembers you.', lb_err: 'Could not reach the leaderboard right now. Try again.', lb_empty: 'No one has sung yet. Be the first.', lb_need: 'Write a name up to 16 letters.',
   },
 };
@@ -128,9 +128,14 @@ const BOOK = QS.get('livro') === '1' ? {
   luz: _cl(parseFloat(QS.get('luz') || '0') || 0, 0, 100),
   bronze: QS.get('bronze') === '1',
   ferido: QS.get('ferido') === '1',
+  hesitou: QS.get('hesitou') === '1',
 } : null;
 if (QS.get('lang')) LANG = QS.get('lang') === 'pt' ? 'pt' : 'en';
-if (BOOK) CONFIG.TIME_LIMIT = Math.round(180 - BOOK.luz * 0.5); // muita Luz atrai os Tacets mais depressa
+if (BOOK) {
+  CONFIG.TIME_LIMIT = Math.round(180 - BOOK.luz * 0.5); // muita Luz atrai os Tacets mais depressa...
+  const g = 1 + (BOOK.luz / 100) * 0.55;                // ...mas também acende mais rápido: até +55% de ganho por runa
+  CONFIG.GAIN = CONFIG.GAIN.map((v) => v * g);
+}
 
 
 // ---------------------------------------------------------------------------
@@ -1010,6 +1015,9 @@ function beginIntro() {
   S.mode = 'intro'; S.t0 = S.t;
   Audio.startSteps(); Audio.startSong(2.0); S.songLive = true; S.beatIdx = 0;
   $('#hud').classList.add('show'); buildKeypad(); updateKeypad();
+  // ecos de escolhas feitas antes, no livro: pequenas legendas, só quando fazem sentido
+  if (BOOK && BOOK.ferido) setTimeout(() => caption(T('c_ferido'), 3), 900);
+  if (BOOK && BOOK.hesitou) setTimeout(() => caption(T('c_hesitou'), 3), BOOK.ferido ? 4200 : 900);
 }
 function win() {
   S.mode = 'win'; S.winT = S.playT; S.endT = 0; S.winPhase = 0;
@@ -1067,8 +1075,8 @@ function showEnd(won) {
   } else r.hidden = true;
   el.classList.remove('hide'); document.body.classList.remove('playing');
   $('#keypad') && $('#keypad').remove();
-  if (BOOK) { bookButtons(won); return; }
   prepareBoard(won);
+  if (BOOK) { bookButtons(won); return; }
   setTimeout(() => ($('#lbForm').hidden ? $('#again') : $('#lbName')).focus(), 50);
 }
 
@@ -1326,14 +1334,17 @@ addEventListener('keydown', (e) => {
 applyLang();
 if (IS_TOUCH) document.body.classList.add('touch');
 function bookButtons(won) {
+  // o placar (nome + envio ao Supabase) continua igual; só os botões de navegação mudam,
+  // porque no livro é o próprio livro quem decide para onde ir depois
   const row = $('#end .row');
   row.innerHTML = won
-    ? `<button class="cta" id="bkGo">${T('book_go')}</button>`
+    ? `<button class="cta" id="bkGo">${T('book_go')}</button><button class="ghost" id="bkAgain">${T('book_again')}</button>`
     : `<button class="cta" id="bkRetry">${T('book_retry')}</button><button class="ghost" id="bkSkip">${T('book_skip')}</button>`;
   const send = (w) => parent.postMessage({ type: 'aheryn:fim', won: w, score: S.score, time: Math.round(S.winT || S.playT), resets: S.resets, bronzeUsed: !!S.bronzeUsed }, '*');
-  if (won) $('#bkGo').onclick = () => send(true);
-  else { $('#bkRetry').onclick = () => { Audio.init(); Audio.resume(); resetGame(); $('#end').classList.add('hide'); caption(T('c_three'), 2); Audio.voice('v_tres'); beginIntro(); }; $('#bkSkip').onclick = () => send(false); }
-  $('#lb').hidden = true;
+  const jogarDeNovo = () => { Audio.init(); Audio.resume(); resetGame(); $('#end').classList.add('hide'); caption(T('c_three'), 2); Audio.voice('v_tres'); beginIntro(); };
+  if (won) { $('#bkGo').onclick = () => send(true); $('#bkAgain').onclick = jogarDeNovo; }
+  else { $('#bkRetry').onclick = jogarDeNovo; $('#bkSkip').onclick = () => send(false); }
+  setTimeout(() => ($('#lbForm').hidden ? row.firstElementChild : $('#lbName')).focus(), 50);
 }
 if (BOOK) {
   document.body.classList.add('book');
